@@ -48,7 +48,13 @@ class IotCdkPocStack(core.Stack):
                     ])
             })
 
-        template_body = get_template_body(device_type='YaronN_DeviceType1', policy_name="YaronN_Device1-Policy")
+        policy_name = "AwsIotProvisioningDataPolictyTest1"
+        iot.CfnPolicy(scope=self, 
+                      id='AWSIotProvisioningDataPlanePolicy',
+                      policy_document=get_data_policy_doc(),
+                      policy_name=policy_name)
+
+        template_body = get_template_body(device_type='YoYoMaDeviceType', policy_name=policy_name)
         self.provisioning_template = \
             iot.CfnProvisioningTemplate(scope=self, 
                                         id='AWSIoTProvisioningTemplate',
@@ -57,6 +63,52 @@ class IotCdkPocStack(core.Stack):
                                         enabled=True,
                                         template_name='IotProvisioningTemplateTest1',
                                         pre_provisioning_hook=None)
+
+
+def get_data_policy_doc():
+    return {
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Publish",
+        "iot:Receive"
+      ],
+      "Resource": [
+        "arn:aws:iot:eu-west-1:195361640859:topic/12345678/audit",
+        "arn:aws:iot:eu-west-1:195361640859:topic/sdk/test/java",
+        "arn:aws:iot:eu-west-1:195361640859:topic/sdk/test/Python",
+        "arn:aws:iot:eu-west-1:195361640859:topic/topic_1",
+        "arn:aws:iot:eu-west-1:195361640859:topic/topic_2"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Subscribe"
+      ],
+      "Resource": [
+        "arn:aws:iot:eu-west-1:195361640859:topicfilter/12345678/audit",
+        "arn:aws:iot:eu-west-1:195361640859:topicfilter/sdk/test/java",
+        "arn:aws:iot:eu-west-1:195361640859:topicfilter/sdk/test/Python",
+        "arn:aws:iot:eu-west-1:195361640859:topicfilter/topic_1",
+        "arn:aws:iot:eu-west-1:195361640859:topicfilter/topic_2"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iot:Connect"
+      ],
+      "Resource": [
+        "arn:aws:iot:eu-west-1:195361640859:client/sdk-java",
+        "arn:aws:iot:eu-west-1:195361640859:client/basicPubSub",
+        "arn:aws:iot:eu-west-1:195361640859:client/sdk-nodejs-*"
+      ]
+    }
+  ]
+}
 
 
 def get_template_body(device_type: str, policy_name: str) -> str:
